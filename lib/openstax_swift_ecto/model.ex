@@ -191,7 +191,7 @@ defmodule OpenStax.Swift.Ecto.Model do
   def upload(repo, record, body) when is_binary(body) and is_map(record) do
     {:ok, tempfile_fd, tempfile_path} = Temp.open(to_string(__MODULE__))
 
-    result = do_upload(repo, record, tempfile_path)
+    result = do_upload(repo, record, tempfile_path, nil)
 
     File.close(tempfile_fd)
     File.rm!(tempfile_path)
@@ -200,7 +200,7 @@ defmodule OpenStax.Swift.Ecto.Model do
   end
 
   def upload(repo, record, {:file, path}) when is_binary(path) and is_map(record) do
-    do_upload(repo, record, path)
+    do_upload(repo, record, path, Path.basename(path))
   end
 
 
@@ -217,7 +217,7 @@ defmodule OpenStax.Swift.Ecto.Model do
   end
 
 
-  defp do_upload(repo, record, path) do
+  defp do_upload(repo, record, path, file_name) do
     # Get MIME type
     mime_result = FileInfo.get_info(path)[path]
     %FileInfo.Mime{subtype: mime_subtype, type: mime_type} = mime_result
@@ -231,12 +231,13 @@ defmodule OpenStax.Swift.Ecto.Model do
     endpoint_id = record.__struct__.swift_endpoint_id(record)
     container = record.__struct__.swift_container(record)
 
-    case OpenStax.Swift.API.Object.create(endpoint_id, container, object_id, {:file, path}, file_type) do
+    case OpenStax.Swift.API.Object.create(endpoint_id, container, object_id, {:file, path}, file_type, file_name) do
       {:ok, %{etag: file_etag}} ->
         # Update record
         file_type_field = record.__struct__.swift_file_type_field(record)
         file_size_field = record.__struct__.swift_file_size_field(record)
         file_etag_field = record.__struct__.swift_file_etag_field(record)
+        file_name_field = record.__struct__.swift_file_name_field(record)
 
         changeset = record.__struct__.changeset(record, %{})
 
@@ -254,6 +255,12 @@ defmodule OpenStax.Swift.Ecto.Model do
 
         changeset = if Map.has_key?(record, file_etag_field) do
           changeset |> Ecto.Changeset.put_change(file_etag_field, file_etag)
+        else
+          changeset
+        end
+
+        changeset = if Map.has_key?(record, file_name_field) do
+          changeset |> Ecto.Changeset.put_change(file_name_field, file_name)
         else
           changeset
         end
