@@ -50,9 +50,9 @@ defmodule OpenStax.Swift.Ecto.Model do
           record = MyApp.Repo.get!(MyApp.MyModel, 123)
 
           case OpenStax.Swift.Ecto.Model.upload(record, file) do
-            :ok ->
-              IO.puts "OK"
-
+            {:ok, record} ->
+              IO.puts "OK " <> MyApp.MyModel.swift_temp_url(record)
+              
             {:error, reason} ->
               IO.puts "ERROR " <> inspect(reason)
           end
@@ -150,6 +150,16 @@ defmodule OpenStax.Swift.Ecto.Model do
       def swift_file_name_field(_record), do: :file_name
 
 
+      @doc false
+      def swift_temp_url(record, expires \\ 3600) do
+        OpenStax.Swift.Middleware.TempURL.generate(
+          swift_endpoint_id(record),
+          swift_container(record),
+          swift_object_id(record),
+          expires)
+      end
+
+
       defoverridable [
         swift_object_id: 1,
         swift_file_type_field: 1,
@@ -201,9 +211,6 @@ defmodule OpenStax.Swift.Ecto.Model do
     endpoint_id = record.__struct__.swift_endpoint_id(record)
     container = record.__struct__.swift_container(record)
 
-    # FIXME use file as contents
-    # FIXME set name -> change openstax swift lib
-    # FIXME set content type -> change openstax swift lib
     case OpenStax.Swift.API.Object.create(endpoint_id, container, object_id, "") do
       {:ok, %{etag: file_etag}} ->
         # Update record
@@ -211,7 +218,7 @@ defmodule OpenStax.Swift.Ecto.Model do
         file_size_field = record.__struct__.swift_file_size_field(record)
         file_etag_field = record.__struct__.swift_file_etag_field(record)
 
-        changeset = record.__struct__.changeset(record)
+        changeset = record.__struct__.changeset(record, %{})
 
         changeset = if Map.has_key?(record, file_type_field) do
           changeset |> Ecto.Changeset.put_change(file_type_field, file_type)
