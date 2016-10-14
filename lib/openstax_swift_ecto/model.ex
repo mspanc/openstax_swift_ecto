@@ -52,7 +52,7 @@ defmodule OpenStax.Swift.Ecto.Model do
           case OpenStax.Swift.Ecto.Model.upload(record, file) do
             {:ok, record} ->
               IO.puts "OK " <> MyApp.MyModel.swift_temp_url(record)
-              
+
             {:error, reason} ->
               IO.puts "ERROR " <> inspect(reason)
           end
@@ -187,7 +187,8 @@ defmodule OpenStax.Swift.Ecto.Model do
 
   Second argument is a record that is supposed to be "an owner" of the file.
 
-  Third argument is a path to the file.
+  Third argument is a file contents passed as string (not recommended)
+  or path to the file, represented as `{:file, path}`.
 
   On success it returns `{:ok, record}`.
 
@@ -196,22 +197,51 @@ defmodule OpenStax.Swift.Ecto.Model do
 
   On failure to update the record it returns `{:error, {:update, changeset}}`.
   """
-  @spec upload(Ecto.Repo.t, map, String.t) :: {:ok, map} | {:error, any}
-  def upload(repo, record, file_path) when is_binary(file_path) and is_map(record) do
+  @spec upload(Ecto.Repo.t, map, String.t | {:file, String.t}) :: {:ok, map} | {:error, any}
+  def upload(repo, record, body) when is_binary(body) and is_map(record) do
+    {:ok, tempfile_fd, tempfile_path} = Temp.open(to_string(__MODULE__))
+
+    result = do_upload(repo, record, path)
+
+    File.close(tempfile_fd)
+    File.rm!(tempfile_path)
+
+    result
+  end
+
+  def upload(repo, record, {:file, path}) when is_binary(path) and is_map(record) do
+    do_upload(repo, record, path)
+  end
+
+
+
+  @doc """
+  Does the same as `upload/3` but throws an error in case of failure.
+  """
+  @spec upload!(Ecto.Repo.t, map, String.t | {:file, String.t}) :: map
+  def upload!(repo, record, body) when is_map(record) do
+    case upload(repo, record, body) do
+      {:ok, record}    -> record
+      {:error, reason} -> throw reason # FIXME should I use raise or throw?
+    end
+  end
+
+
+  defp do_upload(repo, record, path) do
     # Get MIME type
-    mime_result = FileInfo.get_info(file_path)[file_path]
+    mime_result = FileInfo.get_info(path)[path]
     %FileInfo.Mime{subtype: mime_subtype, type: mime_type} = mime_result
     file_type = mime_type <> "/" <> mime_subtype
 
     # Get file size
-    %File.Stat{size: file_size} = File.stat!(file_path)
+    %File.Stat{size: file_size} = File.stat!(path)
 
     # Upload the file
     object_id = record.__struct__.swift_object_id(record)
     endpoint_id = record.__struct__.swift_endpoint_id(record)
     container = record.__struct__.swift_container(record)
 
-    case OpenStax.Swift.API.Object.create(endpoint_id, container, object_id, "") do
+    case OpenStax.Swift.API.Object.create(endpoint_id, container, object_id, {:file, path}, file_type) do
       {:ok, %{etag: file_etag}} ->
         # Update record
         file_type_field = record.__struct__.swift_file_type_field(record)
@@ -245,18 +275,6 @@ defmodule OpenStax.Swift.Ecto.Model do
 
       {:error, reason} ->
         {:error, {:storage, reason}}
-    end
-  end
-
-
-  @doc """
-  Does the same as `upload/3` but throws an error in case of failure.
-  """
-  @spec upload!(Ecto.Repo.t, map, String.t) :: map
-  def upload!(repo, record, file_path) when is_binary(file_path) and is_map(record) do
-    case upload(repo, record, file_path) do
-      {:ok, record}    -> record
-      {:error, reason} -> throw reason # FIXME should I use raise or throw?
     end
   end
 end

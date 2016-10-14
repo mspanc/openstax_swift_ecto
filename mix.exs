@@ -18,7 +18,7 @@ defmodule OpenStax.Swift.Ecto.Mixfile do
 
 
   def application do
-    [applications: [:openstax_swift, :file_info],
+    [applications: [:openstax_swift, :file_info, :tempfile],
      mod: {OpenStax.Swift.Ecto, []}]
   end
 
@@ -36,6 +36,7 @@ defmodule OpenStax.Swift.Ecto.Mixfile do
     [
       {:openstax_swift, "~> 0.1.5"},
       {:file_info, "~> 0.0.2"},
+      {:temp, "~> 0.4"},
       {:ecto, ">= 0.0.0"},
       {:espec, "~> 0.8.17", only: :test},
       {:ex_doc, "~> 0.11.4", only: :dev},
