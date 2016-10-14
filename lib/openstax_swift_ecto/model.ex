@@ -217,6 +217,19 @@ defmodule OpenStax.Swift.Ecto.Model do
   end
 
 
+  @doc """
+  Generates temporary URL for given record with specified expiry time.
+  """
+  @spec temp_url(map, non_neg_integer) :: String.t
+  def temp_url(record, expires \\ 3600) do
+    OpenStax.Swift.Middleware.TempURL.generate(
+      record.__struct__.swift_endpoint_id(record),
+      record.__struct__.swift_container(record),
+      record.__struct__.swift_object_id(record),
+      expires)
+  end
+
+
   defp do_upload(repo, record, path, file_name) do
     # Get MIME type
     mime_result = FileInfo.get_info(path)[path]
@@ -273,14 +286,5 @@ defmodule OpenStax.Swift.Ecto.Model do
       {:error, reason} ->
         {:error, {:storage, reason}}
     end
-  end
-
-
-  def temp_url(record, expires \\ 3600) do
-    OpenStax.Swift.Middleware.TempURL.generate(
-      record.__struct__.swift_endpoint_id(record),
-      record.__struct__.swift_container(record),
-      record.__struct__.swift_object_id(record),
-      expires)
   end
 end

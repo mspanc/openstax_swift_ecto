@@ -3,7 +3,7 @@ defmodule OpenStax.Swift.Ecto.Mixfile do
 
   def project do
     [app: :openstax_swift_ecto,
-     version: "0.1.0",
+     version: "0.2.0",
      elixir: "~> 1.0",
      elixirc_paths: elixirc_paths(Mix.env),
      description: "OpenStack Swift Ecto integration",
@@ -34,7 +34,7 @@ defmodule OpenStax.Swift.Ecto.Mixfile do
 
   defp deps(:test_dev) do
     [
-      {:openstax_swift, git: "https://github.com/mspanc/openstax_swift.git"},
+      {:openstax_swift, "~> 0.2.0"},
       {:file_info, "~> 0.0.2"},
       {:temp, "~> 0.4"},
       {:ecto, ">= 0.0.0"},
