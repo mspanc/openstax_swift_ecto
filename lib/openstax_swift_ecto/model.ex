@@ -49,7 +49,7 @@ defmodule OpenStax.Swift.Ecto.Model do
         def store_model(id, file) do
           record = MyApp.Repo.get!(MyApp.MyModel, 123)
 
-          case OpenStax.Swift.Ecto.Model.upload(record, file) do
+          case OpenStax.Swift.Ecto.Model.upload(MyApp.Repo, record, file) do
             {:ok, record} ->
               IO.puts "OK " <> OpenStax.Swift.Ecto.Model.temp_url(record)
 
