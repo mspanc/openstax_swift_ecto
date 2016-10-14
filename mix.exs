@@ -18,8 +18,8 @@ defmodule OpenStax.Swift.Ecto.Mixfile do
 
 
   def application do
-    [applications: [:openstax_swift, :file_info, :tempfile],
-     mod: {OpenStax.Swift.Ecto, []}]
+    [applications: [:openstax_swift, :file_info],
+       mod: {OpenStax.Swift.Ecto, []}]
   end
 
 

@@ -191,7 +191,7 @@ defmodule OpenStax.Swift.Ecto.Model do
   def upload(repo, record, body) when is_binary(body) and is_map(record) do
     {:ok, tempfile_fd, tempfile_path} = Temp.open(to_string(__MODULE__))
 
-    result = do_upload(repo, record, path)
+    result = do_upload(repo, record, tempfile_path)
 
     File.close(tempfile_fd)
     File.rm!(tempfile_path)
