@@ -231,7 +231,7 @@ defmodule OpenStax.Swift.Ecto.Model do
     endpoint_id = record.__struct__.swift_endpoint_id(record)
     container = record.__struct__.swift_container(record)
 
-    case OpenStax.Swift.API.Object.create(endpoint_id, container, object_id, {:file, path}, file_type, file_name) do
+    case OpenStax.Swift.API.Object.create(endpoint_id, container, object_id, {:file, path}, file_type, "attachment", file_name) do
       {:ok, %{etag: file_etag}} ->
         # Update record
         file_type_field = record.__struct__.swift_file_type_field(record)
