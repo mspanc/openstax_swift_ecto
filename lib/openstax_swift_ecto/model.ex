@@ -46,10 +46,10 @@ defmodule OpenStax.Swift.Ecto.Model do
   An example usage:
 
       defmodule MyApp.MyLogic do
-        def store_model(id, file) do
-          record = MyApp.Repo.get!(MyApp.MyModel, 123)
+        def attach_file_to_record(record_id, path) do
+          record = MyApp.Repo.get!(MyApp.MyModel, record_id)
 
-          case OpenStax.Swift.Ecto.Model.upload(MyApp.Repo, record, file) do
+          case OpenStax.Swift.Ecto.Model.upload(MyApp.Repo, record, {:file, path}) do
             {:ok, record} ->
               IO.puts "OK " <> OpenStax.Swift.Ecto.Model.temp_url(record)
 
