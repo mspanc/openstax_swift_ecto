@@ -34,7 +34,7 @@ defmodule OpenStax.Swift.Ecto.Mixfile do
 
   defp deps(:test_dev) do
     [
-      {:openstax_swift, "~> 0.1.5"},
+      {:openstax_swift, git: "https://github.com/mspanc/openstax_swift.git"},
       {:file_info, "~> 0.0.2"},
       {:temp, "~> 0.4"},
       {:ecto, ">= 0.0.0"},

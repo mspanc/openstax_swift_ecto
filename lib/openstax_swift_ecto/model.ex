@@ -51,7 +51,7 @@ defmodule OpenStax.Swift.Ecto.Model do
 
           case OpenStax.Swift.Ecto.Model.upload(record, file) do
             {:ok, record} ->
-              IO.puts "OK " <> MyApp.MyModel.swift_temp_url(record)
+              IO.puts "OK " <> OpenStax.Swift.Ecto.Model.temp_url(record)
 
             {:error, reason} ->
               IO.puts "ERROR " <> inspect(reason)
@@ -148,16 +148,6 @@ defmodule OpenStax.Swift.Ecto.Model do
 
       @doc false
       def swift_file_name_field(_record), do: :file_name
-
-
-      @doc false
-      def swift_temp_url(record, expires \\ 3600) do
-        OpenStax.Swift.Middleware.TempURL.generate(
-          swift_endpoint_id(record),
-          swift_container(record),
-          swift_object_id(record),
-          expires)
-      end
 
 
       defoverridable [
@@ -276,5 +266,14 @@ defmodule OpenStax.Swift.Ecto.Model do
       {:error, reason} ->
         {:error, {:storage, reason}}
     end
+  end
+
+
+  def temp_url(record, expires \\ 3600) do
+    OpenStax.Swift.Middleware.TempURL.generate(
+      record.__struct__.swift_endpoint_id(record),
+      record.__struct__.swift_container(record),
+      record.__struct__.swift_object_id(record),
+      expires)
   end
 end
