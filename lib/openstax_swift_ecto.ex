@@ -3,7 +3,7 @@ defmodule OpenStax.Swift.Ecto do
 
 
   def version do
-    "0.1.0"
+    "0.2.1"
   end
 
 

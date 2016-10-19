@@ -3,7 +3,7 @@ defmodule OpenStax.Swift.Ecto.Mixfile do
 
   def project do
     [app: :openstax_swift_ecto,
-     version: "0.2.0",
+     version: "0.2.1",
      elixir: "~> 1.0",
      elixirc_paths: elixirc_paths(Mix.env),
      description: "OpenStack Swift Ecto integration",

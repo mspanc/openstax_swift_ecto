@@ -190,6 +190,7 @@ defmodule OpenStax.Swift.Ecto.Model do
   @spec upload(Ecto.Repo.t, map, String.t | {:file, String.t}) :: {:ok, map} | {:error, any}
   def upload(repo, record, body) when is_binary(body) and is_map(record) do
     {:ok, tempfile_fd, tempfile_path} = Temp.open(to_string(__MODULE__))
+    IO.binwrite(tempfile_fd, body)
 
     result = do_upload(repo, record, tempfile_path, nil)
 
