@@ -215,7 +215,7 @@ defmodule OpenStax.Swift.Ecto.Model do
 
 
   @doc """
-  Does the same as `upload/3` but throws an error in case of failure.
+  Does the same as `upload/4` but throws an error in case of failure.
   """
   @spec upload!(Ecto.Repo.t, map, String.t | {:file, String.t}) :: map
   def upload!(repo, record, body) when is_map(record) do
