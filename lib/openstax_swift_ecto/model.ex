@@ -188,7 +188,9 @@ defmodule OpenStax.Swift.Ecto.Model do
   On failure to update the record it returns `{:error, {:update, changeset}}`.
   """
   @spec upload(Ecto.Repo.t, map, String.t | {:file, String.t}, [...]) :: {:ok, map} | {:error, any}
-  def upload(repo, record, body, options \\ []) when is_binary(body) and is_map(record) do
+  def upload(repo, record, body, options \\ [])
+
+  def upload(repo, record, body, options) when is_binary(body) and is_map(record) do
     {:ok, tempfile_fd, tempfile_path} = Temp.open(to_string(__MODULE__))
     IO.binwrite(tempfile_fd, body)
 
@@ -200,7 +202,8 @@ defmodule OpenStax.Swift.Ecto.Model do
     result
   end
 
-  def upload(repo, record, {:file, path}, options \\ []) when is_binary(path) and is_map(record) do
+
+  def upload(repo, record, {:file, path}, options) when is_binary(path) and is_map(record) do
     do_upload(repo, record, path, Path.basename(path), options)
   end
 
