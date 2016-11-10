@@ -180,6 +180,11 @@ defmodule OpenStax.Swift.Ecto.Model do
   Third argument is a file contents passed as string (not recommended)
   or path to the file, represented as `{:file, path}`.
 
+  Fourth argument is a list of options containing `{:key, value}` pairs.
+  Supported keys are:
+
+  * :mime_type - if present, use given MIME type instead of performing guess.
+
   On success it returns `{:ok, record}`.
 
   On failure to communicate with the storage it returns
