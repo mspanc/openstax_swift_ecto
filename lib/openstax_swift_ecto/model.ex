@@ -187,12 +187,12 @@ defmodule OpenStax.Swift.Ecto.Model do
 
   On failure to update the record it returns `{:error, {:update, changeset}}`.
   """
-  @spec upload(Ecto.Repo.t, map, String.t | {:file, String.t}) :: {:ok, map} | {:error, any}
-  def upload(repo, record, body) when is_binary(body) and is_map(record) do
+  @spec upload(Ecto.Repo.t, map, String.t | {:file, String.t}, [...]) :: {:ok, map} | {:error, any}
+  def upload(repo, record, body, options \\ []) when is_binary(body) and is_map(record) do
     {:ok, tempfile_fd, tempfile_path} = Temp.open(to_string(__MODULE__))
     IO.binwrite(tempfile_fd, body)
 
-    result = do_upload(repo, record, tempfile_path, nil)
+    result = do_upload(repo, record, tempfile_path, nil, options)
 
     File.close(tempfile_fd)
     File.rm!(tempfile_path)
@@ -200,8 +200,8 @@ defmodule OpenStax.Swift.Ecto.Model do
     result
   end
 
-  def upload(repo, record, {:file, path}) when is_binary(path) and is_map(record) do
-    do_upload(repo, record, path, Path.basename(path))
+  def upload(repo, record, {:file, path}, options \\ []) when is_binary(path) and is_map(record) do
+    do_upload(repo, record, path, Path.basename(path), options)
   end
 
 
@@ -231,11 +231,17 @@ defmodule OpenStax.Swift.Ecto.Model do
   end
 
 
-  defp do_upload(repo, record, path, file_name) do
-    # Get MIME type
-    mime_result = FileInfo.get_info(path)[path]
-    %FileInfo.Mime{subtype: mime_subtype, type: mime_type} = mime_result
-    file_type = mime_type <> "/" <> mime_subtype
+  defp do_upload(repo, record, path, file_name, options) do
+    # Get MIME type if not passed
+    file_type = case options |> List.keyfind(:mime_type, 0) do
+      nil ->
+        mime_result = FileInfo.get_info(path)[path]
+        %FileInfo.Mime{subtype: mime_subtype, type: mime_type} = mime_result
+        file_type = mime_type <> "/" <> mime_subtype
+
+      {_, mime_type} ->
+        mime_type
+    end
 
     # Get file size
     %File.Stat{size: file_size} = File.stat!(path)
