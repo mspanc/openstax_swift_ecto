@@ -245,7 +245,7 @@ defmodule OpenStax.Swift.Ecto.Model do
       nil ->
         mime_result = FileInfo.get_info(path)[path]
         %FileInfo.Mime{subtype: mime_subtype, type: mime_type} = mime_result
-        file_type = mime_type <> "/" <> mime_subtype
+        mime_type <> "/" <> mime_subtype
 
       {_, mime_type} ->
         mime_type
