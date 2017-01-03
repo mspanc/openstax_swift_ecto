@@ -39,7 +39,7 @@ defmodule OpenStax.Swift.Ecto.Mixfile do
       {:temp, "~> 0.4"},
       {:ecto, ">= 0.0.0"},
       {:espec, "~> 0.8.17", only: :test},
-      {:ex_doc, "~> 0.11.4", only: :dev},
+      {:ex_doc, "~> 0.14.5", only: :dev},
       {:earmark, ">= 0.0.0", only: :dev}
     ]
   end
